@@ -35,13 +35,19 @@ pub fn ToastContainer() -> impl IntoView {
     }
 }
 
+fn is_route_active(pathname: &str, target: &str) -> bool {
+    let norm = pathname.trim_end_matches('/');
+    let norm_target = target.trim_end_matches('/');
+    norm == norm_target
+}
+
 fn render_nav_icon(path: &str) -> AnyView {
     match path {
-        "/" => view! { <IconLayoutDashboard class="w-4 h-4 shrink-0" /> }.into_any(),
-        "/work-hours" => view! { <IconClock class="w-4 h-4 shrink-0" /> }.into_any(),
-        "/programs" => view! { <IconClipboardList class="w-4 h-4 shrink-0" /> }.into_any(),
-        "/lagging" => view! { <IconShieldCheck class="w-4 h-4 shrink-0" /> }.into_any(),
-        "/report" => view! { <IconFileCheck class="w-4 h-4 shrink-0" /> }.into_any(),
+        "/sobat-k3/" => view! { <IconLayoutDashboard class="w-4 h-4 shrink-0" /> }.into_any(),
+        "/sobat-k3/work-hours" => view! { <IconClock class="w-4 h-4 shrink-0" /> }.into_any(),
+        "/sobat-k3/programs" => view! { <IconClipboardList class="w-4 h-4 shrink-0" /> }.into_any(),
+        "/sobat-k3/lagging" => view! { <IconShieldCheck class="w-4 h-4 shrink-0" /> }.into_any(),
+        "/sobat-k3/report" => view! { <IconFileCheck class="w-4 h-4 shrink-0" /> }.into_any(),
         _ => view! { <IconSettings class="w-4 h-4 shrink-0" /> }.into_any(),
     }
 }
@@ -59,14 +65,14 @@ pub fn AppLayout(children: Children) -> impl IntoView {
             .map(|u| u.role == UserRole::Admin)
             .unwrap_or(false);
         let mut items = vec![
-            ("/", "Dashboard"),
-            ("/work-hours", "Jam Kerja"),
-            ("/programs", "Program TSP"),
-            ("/lagging", "Lagging K3L"),
-            ("/report", "Pengesahan"),
+            ("/sobat-k3/", "Dashboard"),
+            ("/sobat-k3/work-hours", "Jam Kerja"),
+            ("/sobat-k3/programs", "Program TSP"),
+            ("/sobat-k3/lagging", "Lagging K3L"),
+            ("/sobat-k3/report", "Pengesahan"),
         ];
         if is_admin {
-            items.push(("/admin", "Manajemen Admin"));
+            items.push(("/sobat-k3/admin", "Manajemen Admin"));
         }
         items
     };
@@ -93,7 +99,7 @@ pub fn AppLayout(children: Children) -> impl IntoView {
                         each=nav_items
                         key=|item| item.0
                         children=move |(path, label)| {
-                            let is_active = move || location.pathname.get() == path;
+                            let is_active = move || is_route_active(&location.pathname.get(), path);
                             view! {
                                 <A href=path attr:class=move || {
                                     if is_active() {
@@ -157,12 +163,12 @@ pub fn AppLayout(children: Children) -> impl IntoView {
                             </div>
                         })}
                         <div class="flex flex-col gap-1">
-                            <A href="/report" attr:class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm hover:bg-muted" on:click=move |_| mobile_menu_open.set(false)>
+                            <A href="/sobat-k3/report" attr:class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm hover:bg-muted" on:click=move |_| mobile_menu_open.set(false)>
                                 <IconFileCheck class="w-4 h-4 text-primary" />
                                 <span>"Pengesahan & Export"</span>
                             </A>
                             <Show when=move || state.user.get().map(|u| u.role == UserRole::Admin).unwrap_or(false)>
-                                <A href="/admin" attr:class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm hover:bg-muted" on:click=move |_| mobile_menu_open.set(false)>
+                                <A href="/sobat-k3/admin" attr:class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm hover:bg-muted" on:click=move |_| mobile_menu_open.set(false)>
                                     <IconSettings class="w-4 h-4 text-primary" />
                                     <span>"Manajemen Pengguna"</span>
                                 </A>
@@ -177,7 +183,7 @@ pub fn AppLayout(children: Children) -> impl IntoView {
             </Show>
 
             // Main Content Area
-            <main class="flex-1 md:pl-64 pb-24 md:pb-10 print-full">
+            <main class="flex-1 min-w-0 w-full md:pl-64 pb-24 md:pb-10 overflow-x-hidden print-full">
                 <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 space-y-6 print-full">
                     {children()}
                 </div>
@@ -185,23 +191,23 @@ pub fn AppLayout(children: Children) -> impl IntoView {
 
             // Mobile Bottom Navigation Bar
             <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 border-t bg-card/95 backdrop-blur-md flex justify-around items-center h-16 px-2 no-print">
-                <A href="/" attr:class=move || if location.pathname.get() == "/" { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
+                <A href="/sobat-k3/" attr:class=move || if is_route_active(&location.pathname.get(), "/sobat-k3/") { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
                     <IconLayoutDashboard class="w-5 h-5" />
                     <span>"Home"</span>
                 </A>
-                <A href="/work-hours" attr:class=move || if location.pathname.get() == "/work-hours" { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
+                <A href="/sobat-k3/work-hours" attr:class=move || if is_route_active(&location.pathname.get(), "/sobat-k3/work-hours") { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
                     <IconClock class="w-5 h-5" />
                     <span>"Jam Kerja"</span>
                 </A>
-                <A href="/programs" attr:class=move || if location.pathname.get() == "/programs" { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
+                <A href="/sobat-k3/programs" attr:class=move || if is_route_active(&location.pathname.get(), "/sobat-k3/programs") { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
                     <IconClipboardList class="w-5 h-5" />
                     <span>"TSP"</span>
                 </A>
-                <A href="/lagging" attr:class=move || if location.pathname.get() == "/lagging" { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
+                <A href="/sobat-k3/lagging" attr:class=move || if is_route_active(&location.pathname.get(), "/sobat-k3/lagging") { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
                     <IconShieldCheck class="w-5 h-5" />
                     <span>"Lagging"</span>
                 </A>
-                <A href="/report" attr:class=move || if location.pathname.get() == "/report" { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
+                <A href="/sobat-k3/report" attr:class=move || if is_route_active(&location.pathname.get(), "/sobat-k3/report") { "flex flex-col items-center gap-1 text-[11px] font-semibold text-primary" } else { "flex flex-col items-center gap-1 text-[11px] text-muted-foreground" }>
                     <IconFileCheck class="w-5 h-5" />
                     <span>"Laporan"</span>
                 </A>

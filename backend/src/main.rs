@@ -22,7 +22,13 @@ impl Fairing for Cors {
     }
 
     async fn on_response<'r>(&self, request: &'r Request<'_>, response: &mut Response<'r>) {
-        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        let origin = request.headers().get_one("Origin").unwrap_or("");
+        let allow_origin = match origin {
+            "https://www.bpombandung.services" | "https://bpombandung.services" => origin.to_string(),
+            _ => env::var("CORS_ORIGIN")
+                .unwrap_or_else(|_| "https://www.bpombandung.services".to_string()),
+        };
+        response.set_header(Header::new("Access-Control-Allow-Origin", allow_origin));
         response.set_header(Header::new(
             "Access-Control-Allow-Methods",
             "GET, POST, PUT, PATCH, DELETE, OPTIONS",
@@ -31,6 +37,8 @@ impl Fairing for Cors {
             "Access-Control-Allow-Headers",
             "Content-Type, Authorization",
         ));
+        response.set_header(Header::new("X-Content-Type-Options", "nosniff"));
+        response.set_header(Header::new("X-Frame-Options", "SAMEORIGIN"));
         if request.method() == Method::Options {
             response.set_status(Status::NoContent);
         }
@@ -69,10 +77,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .and_then(|v| v.parse().ok())
         .unwrap_or(8000);
 
+    let address = env::var("ROCKET_ADDRESS").unwrap_or_else(|_| "127.0.0.1".to_string());
+
     use rocket::data::ToByteUnit;
     let figment = rocket::Config::figment()
         .merge(("port", port))
-        .merge(("address", "0.0.0.0"))
+        .merge(("address", address))
         .merge(("limits", rocket::data::Limits::default().limit("file", 10.mebibytes())));
 
     let _rocket = rocket::custom(figment)

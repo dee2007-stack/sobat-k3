@@ -49,12 +49,13 @@ pub fn App() -> impl IntoView {
             <Router>
                 <AppLayout>
                     <Routes fallback=|| view! { <DashboardPage /> }>
-                        <Route path=path!("/") view=DashboardPage />
-                        <Route path=path!("/work-hours") view=WorkHoursPage />
-                        <Route path=path!("/programs") view=ProgramsPage />
-                        <Route path=path!("/lagging") view=LaggingPage />
-                        <Route path=path!("/report") view=ReportPage />
-                        <Route path=path!("/admin") view=AdminUsersPage />
+                        <Route path=path!("/sobat-k3") view=DashboardPage />
+                        <Route path=path!("/sobat-k3/") view=DashboardPage />
+                        <Route path=path!("/sobat-k3/work-hours") view=WorkHoursPage />
+                        <Route path=path!("/sobat-k3/programs") view=ProgramsPage />
+                        <Route path=path!("/sobat-k3/lagging") view=LaggingPage />
+                        <Route path=path!("/sobat-k3/report") view=ReportPage />
+                        <Route path=path!("/sobat-k3/admin") view=AdminUsersPage />
                     </Routes>
                 </AppLayout>
             </Router>

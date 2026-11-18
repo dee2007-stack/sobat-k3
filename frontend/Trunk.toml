@@ -1,6 +1,7 @@
 [build]
 target = "index.html"
 dist = "dist"
+public_url = "/sobat-k3/"
 
 [serve]
 address = "127.0.0.1"

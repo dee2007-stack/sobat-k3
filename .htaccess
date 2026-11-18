@@ -1,0 +1,2 @@
+# Tutup akses langsung ke direktori source code, .env, backend, dan uploads
+Require all denied

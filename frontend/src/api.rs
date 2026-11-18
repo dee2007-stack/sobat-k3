@@ -5,6 +5,15 @@ use shared::models::*;
 use wasm_bindgen::JsCast;
 use web_sys::{Blob, BlobPropertyBag, HtmlAnchorElement, Url};
 
+const API_BASE: &str = match option_env!("SOBAT_K3_BASE") {
+    Some(v) => v,
+    None => "/sobat-k3",
+};
+
+fn api_url(path: &str) -> String {
+    format!("{}{}", API_BASE, path)
+}
+
 async fn parse_resp<T: DeserializeOwned>(resp: gloo_net::http::Response) -> Result<T, String> {
     if resp.ok() {
         resp.json::<T>()
@@ -21,7 +30,8 @@ async fn parse_resp<T: DeserializeOwned>(resp: gloo_net::http::Response) -> Resu
 }
 
 pub async fn get_json<T: DeserializeOwned>(url: &str, token: &str) -> Result<T, String> {
-    let resp = Request::get(url)
+    let full_url = api_url(url);
+    let resp = Request::get(&full_url)
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await
@@ -34,7 +44,8 @@ pub async fn post_json<B: Serialize, T: DeserializeOwned>(
     body: &B,
     token: Option<&str>,
 ) -> Result<T, String> {
-    let mut req = Request::post(url).header("Content-Type", "application/json");
+    let full_url = api_url(url);
+    let mut req = Request::post(&full_url).header("Content-Type", "application/json");
     if let Some(t) = token {
         req = req.header("Authorization", &format!("Bearer {}", t));
     }
@@ -52,7 +63,8 @@ pub async fn put_json<B: Serialize, T: DeserializeOwned>(
     body: &B,
     token: &str,
 ) -> Result<T, String> {
-    let resp = Request::put(url)
+    let full_url = api_url(url);
+    let resp = Request::put(&full_url)
         .header("Authorization", &format!("Bearer {}", token))
         .header("Content-Type", "application/json")
         .json(body)
@@ -64,7 +76,8 @@ pub async fn put_json<B: Serialize, T: DeserializeOwned>(
 }
 
 pub async fn delete_req(url: &str, token: &str) -> Result<(), String> {
-    let resp = Request::delete(url)
+    let full_url = api_url(url);
+    let resp = Request::delete(&full_url)
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await
@@ -82,7 +95,7 @@ pub async fn delete_req(url: &str, token: &str) -> Result<(), String> {
 }
 
 pub async fn download_xlsx(period_id: &str, year: i32, token: &str) -> Result<(), String> {
-    let url = format!("/api/periods/{}/export/xlsx", period_id);
+    let url = api_url(&format!("/api/periods/{}/export/xlsx", period_id));
     let resp = Request::get(&url)
         .header("Authorization", &format!("Bearer {}", token))
         .send()
